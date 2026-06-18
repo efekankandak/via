@@ -68,13 +68,17 @@ function buildTripPrompt(params: {
 }): string {
   const { fromCity, toCity, startDate, durationDays, preferences, waypoints } = params;
 
-  const waypointText = waypoints.length > 0
+  const waypointText = waypoints && waypoints.length > 0
     ? `\nYol güzergahında mutlaka uğranacak şehirler: ${waypoints.join(", ")}.`
     : "";
 
   const prefText = preferences.length > 0
     ? preferences.join(", ")
     : "Tarih, Kültür, Yemek, Doğa";
+
+  const rule8 = waypoints && waypoints.length > 0
+    ? "8. Yol üstü şehirlerde 1 gün kal, varış şehrine kalan günleri ayır (yol üstü şehirleri olarak sadece belirtilen durakları kullan)."
+    : `8. Yol üstünde başka hiçbir şehirde duraklama/aktivite planlama. Tüm seyahat günlerini sadece kalkış (${fromCity}) ve varış (${toCity}) şehirlerine ayır (yol üstündeki başka hiçbir ili/ilçeyi plana dahil etme).`;
 
   return `Sen Türkiye'nin her köşesini bilen, 20 yıllık deneyime sahip bir uzman seyahat rehberisin.
 Aşağıdaki seyahat için DETAYLI, GERÇEKÇİ ve YARATICI bir gezi planı hazırla.
@@ -94,7 +98,7 @@ KESİN KURALLAR:
 5. Aynı kategoriden art arda iki mekan koyma — çeşitlilik sağla
 6. GPS koordinatları gerçeğe yakın olsun
 7. "address" alanına gerçek mahalle/semt bilgisi yaz
-8. Yol üstü şehirlerde 1 gün kal, varış şehrine kalan günleri ayır
+${rule8}
 
 KATEGORİ SEÇENEKLERİ (tam olarak bu listeden seç):
 Tarihi Yapı | Müze | Doğa & Manzara | Yemek & Mutfak | Alışveriş | Dini Yapı | Park & Bahçe | Eğlence | Sanat & Kültür | Çarşı & Pazar
