@@ -131,7 +131,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     const SizedBox(height: 8),
                     // Alt Başlık
                     Text(
-                      'Yapay Zeka Destekli Seyahat Rehberi',
+                      'Yapay Zeka Destekli Seyahat Rehberiniz',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
