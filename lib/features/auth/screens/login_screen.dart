@@ -54,15 +54,38 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ).animate().fadeIn(delay: 200.ms),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
+
+                // Yapay Zeka Destekli Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.25),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    'YAPAY ZEKA DESTEKLİ',
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ).animate().fadeIn(delay: 280.ms),
+
+                const SizedBox(height: 12),
 
                 Text(
-                  'Yapay zeka destekli kişisel\nseyahat rehberiniz',
+                  'Kişisel Seyahat Rehberiniz',
                   style: GoogleFonts.inter(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.secondaryLabel,
-                    height: 1.4,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.label,
                     letterSpacing: -0.4,
                   ),
                   textAlign: TextAlign.center,
