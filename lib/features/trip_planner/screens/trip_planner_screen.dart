@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -191,6 +192,8 @@ class TripPlannerScreen extends StatelessWidget {
               ? () {
                   if (isLastStep) {
                     cubit.generateTrip();
+                  } else if (state.currentStep == PlannerStep.preferences) {
+                    _showWaypointSelectionDialog(context, cubit);
                   } else {
                     cubit.nextStep();
                   }
@@ -252,5 +255,58 @@ class TripPlannerScreen extends StatelessWidget {
       case PlannerStep.waypoints:
         return true;
     }
+  }
+
+  void _showWaypointSelectionDialog(BuildContext context, TripPlannerCubit cubit) {
+    showCupertinoDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) => CupertinoAlertDialog(
+        title: Text(
+          'Yol Üstü Duraklar',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Text(
+            'Rotanız üzerinde uğramak istediğiniz başka duraklar/şehirler eklemek ister misiniz?',
+            style: GoogleFonts.inter(
+              color: AppColors.secondaryLabel,
+            ),
+          ),
+        ),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            child: Text(
+              'Hayır, Direkt Oluştur',
+              style: GoogleFonts.inter(
+                color: Colors.white54,
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              cubit.generateTrip();
+            },
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: Text(
+              'Evet, Durak Ekle',
+              style: GoogleFonts.inter(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              cubit.nextStep();
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
