@@ -107,8 +107,8 @@ function buildTripPrompt(params: {
     : "Tarih, Kültür, Yemek, Doğa";
 
   const rule8 = waypoints && waypoints.length > 0
-    ? "8. Yol üstü şehirlerde 1 gün kal, varış şehrine kalan günleri ayır (yol üstü şehirleri olarak sadece belirtilen durakları kullan)."
-    : `8. Yol üstünde başka hiçbir şehirde duraklama/aktivite planlama. Tüm seyahat günlerini sadece kalkış (${fromCity}) ve varış (${toCity}) şehirlerine ayır (yol üstündeki başka hiçbir ili/ilçeyi plana dahil etme).`;
+    ? `8. Yol üstü şehirlerde 1 gün kal, varış şehrine (${toCity}) kalan günleri ayır (yol üstü şehirleri olarak sadece belirtilen durakları kullan). Kalkış şehrinde (${fromCity}) hiçbir duraklama/aktivite planlama.`
+    : `8. Yol üstünde veya kalkış şehrinde (${fromCity}) hiçbir duraklama/aktivite planlama. Tüm seyahat günlerini sadece varış şehrine (${toCity}) ayır.`;
 
   return `Sen Türkiye'nin her köşesini bilen, 20 yıllık deneyime sahip bir uzman seyahat rehberisin.
 Aşağıdaki seyahat için DETAYLI, GERÇEKÇİ ve YARATICI bir gezi planı hazırla.
