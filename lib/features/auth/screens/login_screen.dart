@@ -57,7 +57,7 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 Text(
-                  'Yapay zeka destekli kişisel\nseyahat rehberiniz Via',
+                  'Yapay zeka destekli kişisel\nseyahat rehberiniz',
                   style: GoogleFonts.inter(
                     fontSize: 17,
                     fontWeight: FontWeight.w400,
