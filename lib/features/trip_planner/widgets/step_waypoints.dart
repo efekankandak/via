@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/city_photo_widget.dart';
+import '../../../core/widgets/city_picker_bottom_sheet.dart';
 import '../cubit/trip_planner_cubit.dart';
 import '../cubit/trip_planner_state.dart';
 
@@ -15,22 +16,14 @@ class StepWaypoints extends StatefulWidget {
 }
 
 class _StepWaypointsState extends State<StepWaypoints> {
-  final _controller = TextEditingController();
-  final _focusNode = FocusNode();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  void _addWaypoint() {
-    final city = _controller.text.trim();
-    if (city.isNotEmpty) {
-      context.read<TripPlannerCubit>().addWaypoint(city);
-      _controller.clear();
-      _focusNode.requestFocus();
+  Future<void> _pickAndAddWaypoint() async {
+    final cubit = context.read<TripPlannerCubit>();
+    final picked = await CityPickerBottomSheet.show(
+      context,
+      title: 'Yol Üstü Durak Ekle',
+    );
+    if (picked != null) {
+      cubit.addWaypoint(picked);
     }
   }
 
@@ -54,7 +47,7 @@ class _StepWaypointsState extends State<StepWaypoints> {
               ).animate().fadeIn(delay: 100.ms),
               const SizedBox(height: 6),
               Text(
-                'Rota üzerinde uğramak istediğiniz şehirleri ekleyin. Bu adım isteğe bağlıdır.',
+                'Rota üzerinde uğramak istediğiniz şehirleri ekleyin.',
                 style: GoogleFonts.inter(
                   fontSize: 15,
                   color: AppColors.secondaryLabel,
@@ -65,45 +58,44 @@ class _StepWaypointsState extends State<StepWaypoints> {
 
               const SizedBox(height: 24),
 
-              // ── Giriş Alanı ──────────────────────
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      onSubmitted: (_) => _addWaypoint(),
-                      style: GoogleFonts.inter(
-                        fontSize: 17,
-                        color: AppColors.label,
+              // ── Seçim Alanı (81 İl Seçimi) ─────────
+              GestureDetector(
+                onTap: _pickAndAddWaypoint,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondaryBackground,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.separator.withOpacity(0.5),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.add_location_rounded,
+                        color: AppColors.primary,
+                        size: 22,
                       ),
-                      decoration: InputDecoration(
-                        hintText: 'Şehir adı ekle...',
-                        prefixIcon: const Icon(
-                          Icons.add_location_rounded,
-                          color: AppColors.primary,
+                      const SizedBox(width: 12),
+                      Text(
+                        'Şehir Seçip Durak Ekle...',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.secondaryLabel,
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: _addWaypoint,
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
+                      const Spacer(),
+                      const Icon(
                         Icons.add_rounded,
-                        color: Colors.white,
-                        size: 24,
+                        color: AppColors.primary,
+                        size: 22,
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ).animate().fadeIn(delay: 280.ms).slideY(begin: 0.1, curve: Curves.easeOut),
 
               const SizedBox(height: 28),
@@ -327,7 +319,7 @@ class _StepWaypointsState extends State<StepWaypoints> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Bu adımı atlayabilir veya isteğe bağlı\nduraklar ekleyebilirsiniz',
+            'Güzergahınıza eklemek istediğiniz durakları\nyukarıdan seçebilirsiniz.',
             style: GoogleFonts.inter(
               fontSize: 13,
               color: AppColors.secondaryLabel,
