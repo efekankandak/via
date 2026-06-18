@@ -23,35 +23,65 @@ const LOCATION   = "us-central1";
  */
 async function callGemini(prompt: string, jsonMode = true): Promise<string> {
   const vertex = new VertexAI({ project: PROJECT_ID, location: LOCATION });
+  const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash"];
+  let lastError: any = null;
 
-  const model = vertex.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    generationConfig: {
-      temperature: 0.7,
-      topP: 0.95,
-      maxOutputTokens: 32768, // JSON truncation'u önlemek için yüksek limit
-      responseMimeType: jsonMode ? "application/json" : "text/plain",
-    },
-  });
+  for (const modelName of modelsToTry) {
+    const model = vertex.getGenerativeModel({
+      model: modelName,
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.95,
+        maxOutputTokens: 32768, // JSON truncation'u önlemek için yüksek limit
+        responseMimeType: jsonMode ? "application/json" : "text/plain",
+      },
+    });
 
-  const request = {
-    contents: [{ role: "user" as const, parts: [{ text: prompt }] }],
-  };
+    const request = {
+      contents: [{ role: "user" as const, parts: [{ text: prompt }] }],
+    };
 
-  const response = await model.generateContent(request);
-  const candidate = response.response.candidates?.[0];
+    const maxRetries = 3;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Calling ${modelName} (Attempt ${attempt}/${maxRetries})...`);
+        const response = await model.generateContent(request);
+        const candidate = response.response.candidates?.[0];
 
-  // Truncation kontrolü
-  if (candidate?.finishReason && candidate.finishReason !== "STOP") {
-    console.warn("Gemini finishReason:", candidate.finishReason);
-    if (candidate.finishReason === "MAX_TOKENS") {
-      throw new Error("Yanıt token limitine ulaştı, çıktı kesildi.");
+        // Truncation kontrolü
+        if (candidate?.finishReason && candidate.finishReason !== "STOP") {
+          console.warn(`${modelName} finishReason:`, candidate.finishReason);
+          if (candidate.finishReason === "MAX_TOKENS") {
+            throw new Error("Yanıt token limitine ulaştı, çıktı kesildi.");
+          }
+        }
+
+        const text = candidate?.content?.parts?.[0]?.text;
+        if (!text) throw new Error("Vertex AI'den boş yanıt alındı.");
+        return text;
+      } catch (error: any) {
+        lastError = error;
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.warn(`Error calling ${modelName} on attempt ${attempt}: ${errorMessage}`);
+
+        const isQuotaError = errorMessage.includes("429") || 
+                             errorMessage.includes("RESOURCE_EXHAUSTED") || 
+                             errorMessage.includes("Kaynak tükendi") || 
+                             errorMessage.includes("Too Many Requests") ||
+                             errorMessage.includes("QUOTA_EXCEEDED");
+
+        if (isQuotaError && attempt < maxRetries) {
+          const delayMs = attempt * 2000; // 2s, 4s...
+          console.log(`Quota limit hit. Retrying in ${delayMs}ms...`);
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        } else {
+          break; // Try next model or fail
+        }
+      }
     }
   }
 
-  const text = candidate?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Vertex AI'den boş yanıt alındı.");
-  return text;
+  throw lastError || new Error("Vertex AI API çağrısı başarısız oldu.");
 }
 
 /**
@@ -246,25 +276,55 @@ Kullanıcının sorularına samimi, yardımcı, bir yerel rehber sıcaklığınd
 
     try {
       const vertex = new VertexAI({ project: PROJECT_ID, location: LOCATION });
-      const model = vertex.getGenerativeModel({
-        model: "gemini-2.5-flash",
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.95,
-          responseMimeType: "text/plain",
-        },
-        systemInstruction: {
-          role: "system",
-          parts: [{ text: systemPromptText }]
+      const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash"];
+      let lastError: any = null;
+
+      for (const modelName of modelsToTry) {
+        const model = vertex.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            temperature: 0.7,
+            topP: 0.95,
+            responseMimeType: "text/plain",
+          },
+          systemInstruction: {
+            role: "system",
+            parts: [{ text: systemPromptText }]
+          }
+        });
+
+        const maxRetries = 3;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+          try {
+            console.log(`chatWithGuide calling ${modelName} (Attempt ${attempt}/${maxRetries})...`);
+            const response = await model.generateContent({
+              contents: messages,
+            });
+
+            const text = response.response.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) throw new Error("Vertex AI'den boş yanıt alındı.");
+            return { response: text };
+          } catch (error: any) {
+            lastError = error;
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.warn(`chatWithGuide error calling ${modelName} on attempt ${attempt}: ${errorMessage}`);
+
+            const isQuotaError = errorMessage.includes("429") || 
+                                 errorMessage.includes("RESOURCE_EXHAUSTED") || 
+                                 errorMessage.includes("Kaynak tükendi") || 
+                                 errorMessage.includes("Too Many Requests") ||
+                                 errorMessage.includes("QUOTA_EXCEEDED");
+
+            if (isQuotaError && attempt < maxRetries) {
+              const delayMs = attempt * 2000;
+              await new Promise((resolve) => setTimeout(resolve, delayMs));
+            } else {
+              break;
+            }
+          }
         }
-      });
-
-      const response = await model.generateContent({
-        contents: messages,
-      });
-
-      const text = response.response.candidates?.[0]?.content?.parts?.[0]?.text;
-      return { response: text || "Üzgünüm, şu an yanıt veremiyorum." };
+      }
+      throw lastError || new Error("Vertex AI API çağrısı başarısız oldu.");
     } catch (error) {
       console.error("chatWithGuide error:", error);
       throw new functions.https.HttpsError("internal", "Sohbet işlenirken hata oluştu.");
