@@ -121,9 +121,9 @@ SEYAHAT BİLGİLERİ:
 - Seyahat tercihleri: ${prefText}${waypointText}
 
 KESİN KURALLAR:
-1. Her gün için tam olarak 5 FARKLI mekan seç
+1. Her gün için 5 ile 7 arasında FARKLI mekan seç (gün uzunluğuna ve seyahat temposuna göre zengin bir plan sun)
 2. Her mekanın o şehirde GERÇEKTEN var olduğunu doğrula — hayali mekan ekleme
-3. Gün planını dengeli dağıt: sabah → öğle → öğleden sonra → akşam
+3. Gün planını dengeli dağıt (Sabah, Öğle, Öğleden Sonra, Akşam ve opsiyonel Gece vakitlerine uygun şekilde)
 4. Her mekanın açıklaması 3 cümle olsun (kısa ve öz): mekan nedir + neden önemli + pratik tavsiye
 5. Aynı kategoriden art arda iki mekan koyma — çeşitlilik sağla
 6. GPS koordinatları gerçeğe yakın olsun
