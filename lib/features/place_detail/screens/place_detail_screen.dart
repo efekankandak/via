@@ -464,18 +464,25 @@ class _PlaceDetailViewState extends State<PlaceDetailView> {
     final lat = widget.place.lat;
     final lng = widget.place.lng;
 
+    // "Sabah: ", "Öğleden Sonra: ", "Akşam: " gibi zaman/sıra etiketlerini temizle
+    String cleanName = name.replaceFirst(RegExp(r'^(Sabah|Öğle|Öğleden Sonra|Akşam|Gece):\s*', caseSensitive: false), '');
+    // Eğer başında "1. Gün - Sabah: " veya "1. Durak: " gibi başka etiketler varsa temizle
+    cleanName = cleanName.replaceFirst(RegExp(r'^(Gün\s*\d+\s*-\s*(Sabah|Öğle|Öğleden Sonra|Akşam|Gece)):\s*', caseSensitive: false), '');
+    cleanName = cleanName.replaceFirst(RegExp(r'^[^:]{1,20}:\s*'), '');
+
     Uri uri;
     if (Platform.isIOS) {
       if (lat != null && lng != null) {
-        uri = Uri.parse('maps://?q=${Uri.encodeComponent(name)}&ll=$lat,$lng');
+        uri = Uri.parse('maps://?daddr=$lat,$lng&q=${Uri.encodeComponent(cleanName)}');
       } else {
-        uri = Uri.parse('maps://?q=${Uri.encodeComponent(name)}');
+        uri = Uri.parse('maps://?daddr=${Uri.encodeComponent(cleanName)}');
       }
     } else {
+      // Android: Google Maps Navigasyon Intent'i (Direkt Yol Tarifi / Navigasyon modu için)
       if (lat != null && lng != null) {
-        uri = Uri.parse('geo:$lat,$lng?q=${Uri.encodeComponent(name)}');
+        uri = Uri.parse('google.navigation:q=$lat,$lng');
       } else {
-        uri = Uri.parse('geo:0,0?q=${Uri.encodeComponent(name)}');
+        uri = Uri.parse('google.navigation:q=${Uri.encodeComponent(cleanName + (widget.place.city != null ? ", ${widget.place.city}" : ""))}');
       }
     }
 
@@ -483,21 +490,23 @@ class _PlaceDetailViewState extends State<PlaceDetailView> {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
       } else {
-        // Fallback to web search
-        final webUri = Uri.parse(
-          'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(name + (widget.place.city != null ? ", ${widget.place.city}" : ""))}',
+        // Fallback: Google Maps Web/Uygulama Yol Tarifi URL'si (Navigasyon yüklü değilse)
+        final fallbackUri = Uri.parse(
+          lat != null && lng != null
+              ? 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng'
+              : 'https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent(cleanName + (widget.place.city != null ? ", ${widget.place.city}" : ""))}',
         );
-        if (await canLaunchUrl(webUri)) {
-          await launchUrl(webUri, mode: LaunchMode.externalApplication);
+        if (await canLaunchUrl(fallbackUri)) {
+          await launchUrl(fallbackUri, mode: LaunchMode.externalApplication);
         } else {
-          throw 'Harita uygulaması başlatılamadı';
+          throw 'Yol tarifi uygulaması başlatılamadı';
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Harita açılamadı: $e'),
+            content: Text('Yol tarifi alınamadı: $e'),
             backgroundColor: AppColors.error,
           ),
         );
