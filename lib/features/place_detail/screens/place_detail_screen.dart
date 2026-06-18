@@ -460,44 +460,55 @@ class _PlaceDetailViewState extends State<PlaceDetailView> {
   }
 
   Future<void> _launchMapApp() async {
-    final name = widget.place.name;
+    final name = widget.place.name.trim();
     final lat = widget.place.lat;
     final lng = widget.place.lng;
 
-    // "Sabah: ", "Öğleden Sonra: ", "Akşam: " gibi zaman/sıra etiketlerini temizle
-    String cleanName = name.replaceFirst(RegExp(r'^(Sabah|Öğle|Öğleden Sonra|Akşam|Gece):\s*', caseSensitive: false), '');
-    // Eğer başında "1. Gün - Sabah: " veya "1. Durak: " gibi başka etiketler varsa temizle
-    cleanName = cleanName.replaceFirst(RegExp(r'^(Gün\s*\d+\s*-\s*(Sabah|Öğle|Öğleden Sonra|Akşam|Gece)):\s*', caseSensitive: false), '');
-    cleanName = cleanName.replaceFirst(RegExp(r'^[^:]{1,20}:\s*'), '');
+    // "Sabah: ", "Öğleden Sonra: " gibi zaman/sıra etiketlerini temizle
+    String cleanName = name;
+    if (name.contains(':')) {
+      final parts = name.split(':');
+      final prefix = parts[0].toLowerCase().trim();
+      if (prefix == 'sabah' ||
+          prefix == 'öğle' ||
+          prefix == 'öğleden sonra' ||
+          prefix == 'akşam' ||
+          prefix == 'gece' ||
+          prefix.startsWith('gün') ||
+          prefix.contains('durak') ||
+          prefix.contains('mekan') ||
+          RegExp(r'^\d+(\.\s*gün)?$').hasMatch(prefix)) {
+        cleanName = parts.sublist(1).join(':').trim();
+      }
+    }
+
+    // Arama yapılacak adres / mekan bilgisi
+    final searchAddress = cleanName + (widget.place.city != null ? ", ${widget.place.city}" : "");
 
     Uri uri;
     if (Platform.isIOS) {
+      // iOS: Apple Maps Yol Tarifi Intent'i (daddr = destination address)
       if (lat != null && lng != null) {
         uri = Uri.parse('maps://?daddr=$lat,$lng&q=${Uri.encodeComponent(cleanName)}');
       } else {
-        uri = Uri.parse('maps://?daddr=${Uri.encodeComponent(cleanName)}');
+        uri = Uri.parse('maps://?daddr=${Uri.encodeComponent(searchAddress)}');
       }
     } else {
-      // Android: Google Maps Navigasyon Intent'i (Direkt Yol Tarifi / Navigasyon modu için)
-      if (lat != null && lng != null) {
-        uri = Uri.parse('google.navigation:q=$lat,$lng');
-      } else {
-        uri = Uri.parse('google.navigation:q=${Uri.encodeComponent(cleanName + (widget.place.city != null ? ", ${widget.place.city}" : ""))}');
-      }
+      // Android: Google Maps Yol Tarifi URL'si (destination = hedef mekan)
+      // Koordinat yerine isimle aramak, arama kutusunda koordinat sayıları yerine mekan adının görünmesini sağlar
+      uri = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent(searchAddress)}');
     }
 
     try {
       if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        // Fallback: Google Maps Web/Uygulama Yol Tarifi URL'si (Navigasyon yüklü değilse)
-        final fallbackUri = Uri.parse(
-          lat != null && lng != null
-              ? 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng'
-              : 'https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent(cleanName + (widget.place.city != null ? ", ${widget.place.city}" : ""))}',
+        // Fallback: Web tabanlı Google Maps yol tarifi
+        final webUri = Uri.parse(
+          'https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent(searchAddress)}'
         );
-        if (await canLaunchUrl(fallbackUri)) {
-          await launchUrl(fallbackUri, mode: LaunchMode.externalApplication);
+        if (await canLaunchUrl(webUri)) {
+          await launchUrl(webUri, mode: LaunchMode.externalApplication);
         } else {
           throw 'Yol tarifi uygulaması başlatılamadı';
         }
