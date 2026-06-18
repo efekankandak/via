@@ -300,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     Text(
-                      'AI destekli kişisel rehberiniz',
+                      'Yapay zeka destekli kişisel rehberiniz Via',
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
@@ -654,7 +654,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'AI rehberiniz hazır. Yukarıdaki butona\ntıklayarak ilk gezi planınızı oluşturun!',
+              'Rehberiniz Via hazır. Yukarıdaki butona\ntıklayarak ilk gezi planınızı oluşturun!',
               style: GoogleFonts.inter(
                 fontSize: 15,
                 color: AppColors.secondaryLabel,

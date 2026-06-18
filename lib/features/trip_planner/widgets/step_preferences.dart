@@ -41,7 +41,7 @@ class StepPreferences extends StatelessWidget {
               ).animate().fadeIn(delay: 100.ms),
               const SizedBox(height: 6),
               Text(
-                'Birden fazla seçebilirsiniz. AI planınızı buna göre şekillendirir.',
+                'Birden fazla seçebilirsiniz. Via planınızı buna göre şekillendirir.',
                 style: GoogleFonts.inter(
                   fontSize: 15,
                   color: AppColors.secondaryLabel,

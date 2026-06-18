@@ -83,7 +83,7 @@ class _GeneratingScreenState extends State<GeneratingScreen> {
                   const SizedBox(height: 48),
 
                   Text(
-                    'AI Planınızı\nHazırlıyor',
+                    'Via Planınızı\nHazırlıyor',
                     style: GoogleFonts.inter(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,

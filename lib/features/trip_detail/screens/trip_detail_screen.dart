@@ -372,7 +372,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'AI Asistanından kapalı mekan alternatifi almak için tıklayın.',
+                    'Via Asistanı\'ndan kapalı mekan alternatifi almak için tıklayın.',
                     style: GoogleFonts.inter(
                       fontSize: 11,
                       color: const Color(0xFFFCA5A5),
