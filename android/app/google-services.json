@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "86317634028",
+    "project_id": "sanalrehber-20b8e",
+    "storage_bucket": "sanalrehber-20b8e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:86317634028:android:a767e586cb4a780d4db0c9",
+        "android_client_info": {
+          "package_name": "com.sanalrehber.sanalrehber"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "86317634028-4hha6dtgr05in0nj20osj07pr6594or7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYhRRmSCGcULlcdtVSxg2ViKgJ405pucs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "86317634028-4hha6dtgr05in0nj20osj07pr6594or7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
